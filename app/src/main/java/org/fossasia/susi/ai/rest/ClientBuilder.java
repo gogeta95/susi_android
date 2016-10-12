@@ -1,9 +1,5 @@
 package org.fossasia.susi.ai.rest;
 
-import org.fossasia.susi.ai.helper.PrefManager;
-
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -14,39 +10,20 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class ClientBuilder {
+    private static SusiService service;
 
-    private static Retrofit retrofit;
-    private static SusiService susiService;
+    private ClientBuilder() {
 
-    public ClientBuilder() {
-        createSusiService();
     }
 
-    private static void init() {
-        susiService = createApi(SusiService.class);
-    }
-
-    private static <T> T createApi(Class<T> clazz) {
-        return retrofit.create(clazz);
-    }
-
-    private static void createSusiService() {
-
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-        httpClient.addInterceptor(logging);
-
-        retrofit = new Retrofit.Builder()
-                .baseUrl(PrefManager.getSusiRunningBaseUrl())
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(httpClient.build())
-                .build();
-        init();
-    }
-
-    public SusiService getSusiApi() {
-        return susiService;
+    public static SusiService getSusiService() {
+        if (service == null) {
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("http://api.asksusi.com")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            service = retrofit.create(SusiService.class);
+        }
+        return service;
     }
 }
